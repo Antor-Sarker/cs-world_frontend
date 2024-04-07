@@ -1,4 +1,5 @@
 import Navbar from "../navbar/navbar";
+import Videos from "../videos/videos";
 
 export default function Home(){
     return(
@@ -9,7 +10,7 @@ export default function Home(){
                 {/* <SideBar/> */}
                 </div>
                 <div className="pt-1 col-start-2 col-span-5 relative">
-                    {/* <Videos/> */}
+                    <Videos/>
                 </div>
             </div>
         </>
