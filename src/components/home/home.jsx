@@ -2,11 +2,15 @@ import Navbar from "../navbar/navbar";
 import SideBar from "../sidebar/sideBar";
 import Videos from "../videos/videos";
 
+import { useState } from "react";
+ 
+
 export default function Home() {
+  const [isOpenSearchModal,setIsOpenSearchModal]= useState(false)
   return (
-    <>
-      <Navbar />
-      <div className=" grid grid-cols-6 absolute top-20 text-white bg-black">
+    <div>
+      <Navbar isOpenSearchModal={isOpenSearchModal} setIsOpenSearchModal={setIsOpenSearchModal}/>
+      <div className={`${isOpenSearchModal && "blur"} grid grid-cols-6 absolute top-20 text-white bg-black`}>
         <div className="pt-1 col-start-1 col-span-1 fixed z-10">
           <SideBar />
         </div>
@@ -14,6 +18,6 @@ export default function Home() {
           <Videos />
         </div>
       </div>
-    </>
+    </div>
   );
 }
