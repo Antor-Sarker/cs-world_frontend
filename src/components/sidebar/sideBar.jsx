@@ -1,40 +1,74 @@
+/* eslint-disable react/prop-types */
 import {
   AdjustmentsVerticalIcon,
+  BookmarkIcon,
   EyeIcon,
   HeartIcon,
-  HomeIcon,
-  BookmarkIcon,
   TagIcon,
 } from "@heroicons/react/24/outline";
+import Sort from "./sort";
+import Tags from "./tags";
 
-export default function SideBar() {
+export default function SideBar({
+  isOpenFilterModal,
+  setIsOpenFilterModal,
+  handelTagsFilter,
+  handelSortFilter,
+}) {
+  function handelOpenFilterModal(name, type) {
+    type === "open" &&
+      setIsOpenFilterModal({ ...isOpenFilterModal, [name]: true });
+    type === "close" &&
+      setIsOpenFilterModal({ ...isOpenFilterModal, [name]: false });
+  }
+
   return (
-    <div className="pl-2 flex flex-col text-white">
-      <div className="flex my-3 cursor-pointer hover:text-pink-500">
-        <HomeIcon className="w-6 h-6 mr-2" /> Home
-      </div>
-      <div className="flex my-3 cursor-pointer hover:text-pink-500">
-        <BookmarkIcon className="w-6 h-6 mr-2" />
-        Saved
-      </div>
-      <div className="flex my-3 cursor-pointer hover:text-pink-500">
-        <HeartIcon className="w-6 h-6 mr-2" />
-        Favourite
+    <>
+      <div className="flex flex-col text-white text-xs">
+        <div className="text-center my-3 cursor-pointer hover:text-pink-500">
+          <BookmarkIcon className="w-6 h-6 mx-8" />
+          <div>Saved</div>
+        </div>
+
+        <div className="text-center my-3 cursor-pointer hover:text-pink-500">
+          <HeartIcon className="w-6 h-6 mx-8" />
+          <div>Favourite</div>
+        </div>
+
+        <div className="text-center my-3 cursor-pointer hover:text-pink-500">
+          <EyeIcon className="w-6 h-6 mx-8" />
+          <div>History</div>
+        </div>
+
+        <div
+          className="text-center my-3 cursor-pointer hover:text-pink-500"
+          onClick={() => handelOpenFilterModal("sort", "open")}
+        >
+          <AdjustmentsVerticalIcon className="w-6 h-6 mx-8" />
+          <div>Sort</div>
+        </div>
+
+        <div
+          className="text-center my-3 cursor-pointer hover:text-pink-500"
+          onClick={() => handelOpenFilterModal("tags", "open")}
+        >
+          <TagIcon className="w-6 h-6 mx-8" />
+          <div>Tags</div>
+        </div>
       </div>
 
-      <div className="flex my-3 cursor-pointer hover:text-pink-500">
-        <EyeIcon className="w-6 h-6 mr-2" />
-        History
-      </div>
-
-      <div className="flex my-3 cursor-pointer hover:text-pink-500">
-        <AdjustmentsVerticalIcon className="w-6 h-6 mr-2" />
-        Filter
-      </div>
-      <div className="flex my-3 cursor-pointer hover:text-pink-500">
-        <TagIcon className="w-6 h-6 mr-2" />
-        Tags
-      </div>
-    </div>
+      {isOpenFilterModal.sort && (
+        <Sort
+          handelOpenFilterModal={handelOpenFilterModal}
+          handelSortFilter={handelSortFilter}
+        />
+      )}
+      {isOpenFilterModal.tags && (
+        <Tags
+          handelOpenFilterModal={handelOpenFilterModal}
+          handelTagsFilter={handelTagsFilter}
+        />
+      )}
+    </>
   );
 }
