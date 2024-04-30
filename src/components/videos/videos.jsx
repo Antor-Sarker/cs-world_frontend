@@ -8,11 +8,22 @@ import {
 import { useNavigate } from "react-router-dom";
 import getPublishedTime from "../../utils/getPublishedTime";
 
+import { useContext } from "react";
+import { AuthContext } from "../../context";
+
 function Video({ data, isOpenFilterModal }) {
+  const { authData } = useContext(AuthContext);
   const navigate = useNavigate();
   function handelNavigate() {
     if (isOpenFilterModal.sort === true || isOpenFilterModal.tags === true)
       return;
+    fetch("http://localhost:3500/viewCount", {
+      method: "POST",
+      body: JSON.stringify({ videoId: data.id, logedInUser: authData }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    });
     navigate(`video/${data.id}`);
   }
 
