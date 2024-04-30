@@ -1,10 +1,17 @@
 /* eslint-disable react/prop-types */
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { useRef, useState } from "react";
+import {
+  MagnifyingGlassIcon,
+  UserCircleIcon
+} from "@heroicons/react/24/outline";
+import { useContext, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context";
 import setHistory from "../../utils/searchHistory";
 import Search from "../search/search";
+
 export default function Navbar({ isOpenSearchModal, setIsOpenSearchModal }) {
   const [searchResult, setSearchResult] = useState(null);
+  const [isOpenLogOutModal, setIsOpenLogOutModal]=useState(false)
   const inputRef = useRef(null);
 
   function handelSearch(query) {
@@ -23,6 +30,14 @@ export default function Navbar({ isOpenSearchModal, setIsOpenSearchModal }) {
     setIsOpenSearchModal((prev) => !prev);
     setSearchResult(null);
   }
+
+  function handelLogOut(){
+    setAuthData(null)
+    setIsOpenLogOutModal(false)
+  }
+
+  const navigate = useNavigate();
+  const { authData, setAuthData } = useContext(AuthContext);
 
   return (
     <>
@@ -47,18 +62,35 @@ export default function Navbar({ isOpenSearchModal, setIsOpenSearchModal }) {
             </div>
           </li>
 
-          <li className="flex justify-end text-white h-10 font-semibold">
-            <div className="flex">
-              <div className=" border border-slate-600 pt-1 mx-3 px-2 rounded hover:bg-green-500 cursor-pointer hidden sm:hidden md:block lg:block xl:block 2xl:block">
-                Sign up
+          <li className="flex justify-end text-white h-10 font-medium">
+            {authData ? (
+              <div onClick={()=>setIsOpenLogOutModal(!isOpenLogOutModal)}>
+                  <UserCircleIcon className="w-10 h-10 cursor-pointer" /> 
               </div>
-              <div className="border border-slate-600 pt-1 px-2 rounded bg-blue-500 hover:bg-[#091524] cursor-pointer">
-                Log in
+            ) : (
+              <div className="flex">
+                <div
+                  className=" border border-slate-600 pt-1 mx-3 px-2 rounded hover:bg-green-500 cursor-pointer hidden sm:hidden md:block lg:block xl:block 2xl:block"
+                  onClick={() => navigate("/register")}
+                >
+                  Sign up
+                </div>
+                <div
+                  className="border border-slate-600 pt-1 px-2 rounded bg-blue-500 hover:bg-[#091524] cursor-pointer"
+                  onClick={() => navigate("/login")}
+                >
+                  Log in
+                </div>
               </div>
-            </div>
+            )}
           </li>
         </ul>
       </nav>
+      <div className={`${!isOpenLogOutModal && "hidden"} fixed right-0 top-16 z-20 rounded bg-slate-700 text-white text-lg font-medium p-1 shadow-lg shadow-black mr-2`}>
+                  <div>{authData?.firstName + " " + authData?.lastName}</div>
+                  <div className="text-sm text-slate-300">{authData?.email}</div>
+                  <div className="bg-red-500 mt-5 text-center cursor-pointer" onClick={handelLogOut}>Log out</div>
+      </div>
       {/* when focus on search input*/}
       {isOpenSearchModal && (
         <Search

@@ -9,6 +9,7 @@ export default function Home() {
     sort: false,
     tags: false,
   });
+  // const [authData, setAuthData] = useState(null);
   const [videosData, setVideosData] = useState(null);
 
   useEffect(() => {

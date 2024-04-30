@@ -18,7 +18,7 @@ function Video({ data, isOpenFilterModal }) {
 
   return (
     <div
-      className="text-sm text-[#b9d0ec] p-4 hover:bg-[#111f31] transition delay-1000 ease-in-out hover:p-0 hover:rounded-lg"
+      className="text-sm text-[#b9d0ec] p-4 hover:bg-[#111f31] hover:p-0 hover:rounded-lg"
       onClick={handelNavigate}
     >
       <div>
@@ -45,7 +45,7 @@ function Video({ data, isOpenFilterModal }) {
           </div>
 
           <div className="flex pl-2 text-lg">
-            <HeartIcon className="h-6 w-6 text-pink-400" />
+            <HeartIcon className="h-6 w-6 text-indigo-400" />
             {data.favouriteCount}
           </div>
         </div>
