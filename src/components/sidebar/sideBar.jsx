@@ -6,20 +6,32 @@ import {
   HeartIcon,
   TagIcon,
 } from "@heroicons/react/24/outline";
+import { useContext } from "react";
+import { AuthContext } from "../../context";
 import Sort from "./sort";
 import Tags from "./tags";
 
 export default function SideBar({
+  setIsOpenHistoryModal,
   isOpenFilterModal,
   setIsOpenFilterModal,
   handelTagsFilter,
   handelSortFilter,
 }) {
+  const { authData } = useContext(AuthContext);
   function handelOpenFilterModal(name, type) {
     type === "open" &&
       setIsOpenFilterModal({ ...isOpenFilterModal, [name]: true });
     type === "close" &&
       setIsOpenFilterModal({ ...isOpenFilterModal, [name]: false });
+  }
+
+  function handelHistoryModal() {
+    if (authData) {
+      setIsOpenHistoryModal(true);
+    } else {
+      alert("Please Login first");
+    }
   }
 
   return (
@@ -35,7 +47,10 @@ export default function SideBar({
           <div>Favourite</div>
         </div>
 
-        <div className="text-center my-3 cursor-pointer hover:text-pink-500">
+        <div
+          className="text-center my-3 cursor-pointer hover:text-pink-500"
+          onClick={handelHistoryModal}
+        >
           <EyeIcon className="w-6 h-6 mx-8" />
           <div>History</div>
         </div>

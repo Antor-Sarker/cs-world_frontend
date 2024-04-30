@@ -1,18 +1,29 @@
 /* eslint-disable react/prop-types */
 import {
   MagnifyingGlassIcon,
-  UserCircleIcon
+  UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useContext, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context";
 import setHistory from "../../utils/searchHistory";
+import History from "../history/history";
 import Search from "../search/search";
 
-export default function Navbar({ isOpenSearchModal, setIsOpenSearchModal }) {
+export default function Navbar({
+  isOpenSearchModal,
+  setIsOpenSearchModal,
+  isOpenHistoryModal,
+  setIsOpenHistoryModal,
+}) {
   const [searchResult, setSearchResult] = useState(null);
-  const [isOpenLogOutModal, setIsOpenLogOutModal]=useState(false)
+  const [isOpenLogOutModal, setIsOpenLogOutModal] = useState(false);
+
+  const [historyData, setHistoryData] = useState([]);
+  const { authData, setAuthData } = useContext(AuthContext);
+
   const inputRef = useRef(null);
+  const navigate = useNavigate();
 
   function handelSearch(query) {
     if (query === "") {
@@ -31,13 +42,27 @@ export default function Navbar({ isOpenSearchModal, setIsOpenSearchModal }) {
     setSearchResult(null);
   }
 
-  function handelLogOut(){
-    setAuthData(null)
-    setIsOpenLogOutModal(false)
+  function handelLogOut() {
+    setAuthData(null);
+    setIsOpenLogOutModal(false);
   }
 
-  const navigate = useNavigate();
-  const { authData, setAuthData } = useContext(AuthContext);
+  function handelDeleteHistory(id) {
+    fetch("http://localhost:3500/history", {
+      method: "DELETE",
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify({ userId: authData.id, videoId: id }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.acknowledged) {
+          const afterDelete = historyData?.filter((item) => item.id !== id);
+          setHistoryData(afterDelete);
+        }
+      });
+  }
 
   return (
     <>
@@ -64,8 +89,8 @@ export default function Navbar({ isOpenSearchModal, setIsOpenSearchModal }) {
 
           <li className="flex justify-end text-white h-10 font-medium">
             {authData ? (
-              <div onClick={()=>setIsOpenLogOutModal(!isOpenLogOutModal)}>
-                  <UserCircleIcon className="w-10 h-10 cursor-pointer" /> 
+              <div onClick={() => setIsOpenLogOutModal(!isOpenLogOutModal)}>
+                <UserCircleIcon className="w-10 h-10 cursor-pointer" />
               </div>
             ) : (
               <div className="flex">
@@ -86,10 +111,19 @@ export default function Navbar({ isOpenSearchModal, setIsOpenSearchModal }) {
           </li>
         </ul>
       </nav>
-      <div className={`${!isOpenLogOutModal && "hidden"} fixed right-0 top-16 z-20 rounded bg-slate-700 text-white text-lg font-medium p-1 shadow-lg shadow-black mr-2`}>
-                  <div>{authData?.firstName + " " + authData?.lastName}</div>
-                  <div className="text-sm text-slate-300">{authData?.email}</div>
-                  <div className="bg-red-500 mt-5 text-center cursor-pointer" onClick={handelLogOut}>Log out</div>
+      <div
+        className={`${
+          !isOpenLogOutModal && "hidden"
+        } fixed right-0 top-16 z-20 rounded bg-slate-700 text-white text-lg font-medium p-1 shadow-lg shadow-black mr-2`}
+      >
+        <div>{authData?.firstName + " " + authData?.lastName}</div>
+        <div className="text-sm text-slate-300">{authData?.email}</div>
+        <div
+          className="bg-red-500 mt-5 text-center cursor-pointer"
+          onClick={handelLogOut}
+        >
+          Log out
+        </div>
       </div>
       {/* when focus on search input*/}
       {isOpenSearchModal && (
@@ -98,6 +132,14 @@ export default function Navbar({ isOpenSearchModal, setIsOpenSearchModal }) {
           handelSearch={handelSearch}
           handelOpenSearchModal={handelOpenSearchModal}
           searchResult={searchResult}
+        />
+      )}
+      {isOpenHistoryModal && (
+        <History
+          setIsOpenHistoryModal={setIsOpenHistoryModal}
+          handelDeleteHistory={handelDeleteHistory}
+          historyData={historyData}
+          setHistoryData={setHistoryData}
         />
       )}
     </>
