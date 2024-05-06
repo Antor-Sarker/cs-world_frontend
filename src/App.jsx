@@ -5,6 +5,9 @@ import Login from "./components/Auth/login";
 import Register from "./components/Auth/register";
 import { AuthContext } from "./context";
 import {useState} from "react"
+import { toast, ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
+
 function App() {
   const [authData, setAuthData] = useState(null);
   return (
@@ -16,6 +19,7 @@ function App() {
       <Route element={<Login/>} path="/login"/>
       <Route element={<Register/>} path="/register"/>
     </Routes>
+    <ToastContainer />
     </AuthContext.Provider>
     </>
   )
