@@ -6,7 +6,7 @@ import Videos from "../videos/videos";
 export default function Home() {
   const [isOpenSearchModal, setIsOpenSearchModal] = useState(false);
   const [isOpenHistoryModal, setIsOpenHistoryModal] = useState(false);
-  
+  const [isOpenFavouriteModal, setIsOpenFavouriteModal] = useState(false);
   const [isOpenFilterModal, setIsOpenFilterModal] = useState({
     sort: false,
     tags: false,
@@ -18,7 +18,7 @@ export default function Home() {
     fetch("http://localhost:3500/videos")
       .then((res) => res.json())
       .then((data) => setVideosData(data));
-  }, []);
+  }, [isOpenFavouriteModal]);
 
   function handelTagsFilter(name) {
     fetch(`http://localhost:3500/tag?name=${name}`)
@@ -37,18 +37,23 @@ export default function Home() {
   return (
     <div className="">
       <Navbar
+        isOpenFavouriteModal={isOpenFavouriteModal}
+        setIsOpenFavouriteModal={setIsOpenFavouriteModal}
         isOpenSearchModal={isOpenSearchModal}
         setIsOpenSearchModal={setIsOpenSearchModal}
+        
         isOpenHistoryModal={isOpenHistoryModal}
         setIsOpenHistoryModal={setIsOpenHistoryModal}
       />
       <div
         className={`${
           isOpenSearchModal && "blur"} ${isOpenHistoryModal && "blur"
-        } grid grid-cols-12 absolute top-20 text-white bg-black`}
+        } ${isOpenFavouriteModal && "blur"
+      } grid grid-cols-12 absolute top-20 text-white bg-black`}
       >
         <div className="pt-1 col-start-1 col-span-2 sm:col-span-2 md:col-span-1 lg:col-span-1 xl:col-span-1 2xl:col-span-1 fixed z-10">
           <SideBar
+            setIsOpenFavouriteModal={setIsOpenFavouriteModal}
             isOpenHistoryModal={isOpenHistoryModal}
             setIsOpenHistoryModal={setIsOpenHistoryModal}
             isOpenFilterModal={isOpenFilterModal}

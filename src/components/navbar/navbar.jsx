@@ -9,8 +9,11 @@ import { AuthContext } from "../../context";
 import setHistory from "../../utils/searchHistory";
 import History from "../history/history";
 import Search from "../search/search";
+import Favourite from "../favourite/favourite";
 
 export default function Navbar({
+  isOpenFavouriteModal,
+  setIsOpenFavouriteModal,
   isOpenSearchModal,
   setIsOpenSearchModal,
   isOpenHistoryModal,
@@ -134,6 +137,13 @@ export default function Navbar({
           searchResult={searchResult}
         />
       )}
+
+      {
+        isOpenFavouriteModal &&
+        <Favourite 
+          setIsOpenFavouriteModal={setIsOpenFavouriteModal}/>
+      }
+
       {isOpenHistoryModal && (
         <History
           setIsOpenHistoryModal={setIsOpenHistoryModal}
@@ -142,6 +152,8 @@ export default function Navbar({
           setHistoryData={setHistoryData}
         />
       )}
+
+
     </>
   );
 }

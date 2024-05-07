@@ -3,13 +3,12 @@ import {
   ClockIcon,
   EllipsisVerticalIcon,
   EyeIcon,
-  HeartIcon,
 } from "@heroicons/react/24/outline";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { AuthContext } from "../../context";
 import getPublishedTime from "../../utils/getPublishedTime";
-import { toast } from 'react-toastify';
 
 function Display({ item }) {
   return (
@@ -26,9 +25,9 @@ function Display({ item }) {
 }
 
 function CommentList({ comments, setComments, comment, videoId, authId }) {
-  const [isOpenModify,setIsOpenModify]=useState(false)
+  const [isOpenModify, setIsOpenModify] = useState(false);
   // const [isOpenEdit,setIsOpenEdit]=useState(false)
-  const { commentId, authorId, authorName, content, time } = comment;
+  const { commentId, authorId, authorName, content } = comment;
   function handelDeleteComment() {
     fetch("http://localhost:3500/comment", {
       method: "DELETE",
@@ -44,28 +43,29 @@ function CommentList({ comments, setComments, comment, videoId, authId }) {
             (comment) => comment.commentId !== commentId
           );
           setComments(afterDelete);
-        
-      toast.success("delete successfully", {
-        theme: "colored",
-        position:"bottom-center"
-      })
+
+          toast.success("delete successfully", {
+            theme: "colored",
+            position: "bottom-center",
+          });
         }
       });
   }
 
-  function handelOpenModal(event){
-    if(event.target.tagName==='svg' || event.target.tagName==='path'){
-      setIsOpenModify(!isOpenModify)
+  function handelOpenModal(event) {
+    if (event.target.tagName === "svg" || event.target.tagName === "path") {
+      setIsOpenModify(!isOpenModify);
+    } else {
+      setIsOpenModify(false);
     }
-    else{
-      setIsOpenModify(false)
-    }
-
   }
 
   return (
     <>
-      <div className="flex items-start space-x-4 my-8" onClick={handelOpenModal}>
+      <div
+        className="flex items-start space-x-4 my-8"
+        onClick={handelOpenModal}
+      >
         <div className="bg-orange-500 text-white w-10 h-10 mt-3 text-center text-2xl rounded-full">
           <span className="">{authorName[0]}</span>
         </div>
@@ -76,24 +76,32 @@ function CommentList({ comments, setComments, comment, videoId, authId }) {
               <h4 className="text-slate -500 font-bold">{authorName}</h4>
             </div>
             <div>
-              {
-                authId===authorId  && <EllipsisVerticalIcon className="w-6 h-6" onClick={handelOpenModal}/>
-              }
+              {authId === authorId && (
+                <EllipsisVerticalIcon
+                  className="w-6 h-6"
+                  onClick={handelOpenModal}
+                />
+              )}
 
-              {isOpenModify && <div className="rounded absolute">
-                <div className="cursor-pointer bg-indigo-300 hover:bg-indigo-500 p-3" onClick={handelEdit}>edit</div>
-                <div className="cursor-pointer p-3 bg-red-300 hover:bg-red-500" onClick={handelDeleteComment}>delete</div>
-              </div>}
-
-               
+              {isOpenModify && (
+                <div className="rounded absolute">
+                  <div className="cursor-pointer bg-indigo-300 hover:bg-indigo-500 p-3">
+                    edit
+                  </div>
+                  <div
+                    className="cursor-pointer p-3 bg-red-300 hover:bg-red-500"
+                    onClick={handelDeleteComment}
+                  >
+                    delete
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           <div>
             <p className="text-slate-300">{content}</p>
           </div>
-
-           
         </div>
       </div>
     </>
@@ -103,12 +111,14 @@ function CommentList({ comments, setComments, comment, videoId, authId }) {
 export default function Player() {
   const [video, setVideo] = useState(null);
   const [videos, setVideos] = useState(null);
+  const [isFavourite, setIsFavourite] = useState(false);
+  const [favouriteCount, setFavouriteCount] = useState(0);
   const [inputComment, setInputComment] = useState("");
   const { authData } = useContext(AuthContext);
   const { id } = useParams();
   const [comments, setComments] = useState(null);
   const bottomRef = useRef(null);
-  const authId = authData?.id
+  const authId = authData?.id;
 
   useEffect(() => {
     fetch(`http://localhost:3500/video/${id}`)
@@ -124,6 +134,46 @@ export default function Player() {
       .then((res) => res.json())
       .then((data) => setVideos(data));
   }, []);
+
+  useEffect(() => {
+    setFavouriteCount(video?.favouriteUser?.length);
+    if (authData) {
+      const result = video?.favouriteUser?.find(
+        (item) => item === authData?.id
+      );
+      result ? setIsFavourite(true) : setIsFavourite(false);
+    }
+  }, [authData, video?.favouriteUser]);
+
+  function handelFavourite() {
+    if (!authData) {
+      //alert for login
+      toast.error("Please Login !", {
+        position: "top-center",
+      });
+    } else {
+      fetch("http://localhost:3500/favourite", {
+        method: "PATCH",
+        body: JSON.stringify({
+          isFavourite: isFavourite ? true : false,
+          userId: authData.id,
+          videoId: video.id,
+        }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      })
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.acknowledged) {
+            isFavourite
+              ? setFavouriteCount((prev) => prev - 1)
+              : setFavouriteCount((prev) => prev + 1);
+            setIsFavourite(!isFavourite);
+          }
+        });
+    }
+  }
 
   function handelOnSubmitComment(event) {
     event.preventDefault();
@@ -152,10 +202,9 @@ export default function Player() {
           }
         });
     } else {
-      
       //alert for login
       toast.error("Please Login !", {
-        position: "top-center"
+        position: "top-center",
       });
       setInputComment("");
     }
@@ -163,7 +212,9 @@ export default function Player() {
 
   function handelScroll(event) {
     bottomRef.current.scrollIntoView();
-    event.target.placeholder= authData? "Write a comment":"Please login to comment" 
+    event.target.placeholder = authData
+      ? "Write a comment"
+      : "Please login to comment";
   }
 
   return (
@@ -205,8 +256,24 @@ export default function Player() {
               </div>
 
               <div className="flex text-lg pl-5 text-indigo-400">
-                <HeartIcon className="h-6 w-6" />
-                {video?.favouriteCount}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className={`w-6 h-6 ${
+                    isFavourite ? "fill-current" : "hover:fill-current"
+                  }  cursor-pointer`}
+                  onClick={handelFavourite}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+                  />
+                </svg>
+                {favouriteCount}
               </div>
             </div>
 
@@ -234,7 +301,10 @@ export default function Player() {
                       value={inputComment}
                     ></textarea>
                     <div className="flex justify-end mt-4">
-                      <button disabled={inputComment==='' && true} className="bg-indigo-600 text-white px-6 py-2 md:py-3 rounded-md hover:bg-indigo-700 transition-all duration-200">
+                      <button
+                        disabled={inputComment === "" && true}
+                        className="bg-indigo-600 text-white px-6 py-2 md:py-3 rounded-md hover:bg-indigo-700 transition-all duration-200"
+                      >
                         Comment
                       </button>
                     </div>
@@ -254,14 +324,12 @@ export default function Player() {
                 authId={authId}
               />
             ))}
-
-          
           </section>
         </div>
 
         <div className="col-span-2 px-10 hidden sm:hidden md:hidden lg:block xl:block 2xl:block h-screen overflow-y-scroll">
           {videos?.map((item) => (
-            <Display key={item.key} item={item} />
+            <Display key={item.id} item={item} />
           ))}
         </div>
       </div>

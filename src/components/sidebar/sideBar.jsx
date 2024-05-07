@@ -6,12 +6,14 @@ import {
   HeartIcon,
   TagIcon,
 } from "@heroicons/react/24/outline";
+import { toast } from "react-toastify";
 import { useContext } from "react";
 import { AuthContext } from "../../context";
 import Sort from "./sort";
 import Tags from "./tags";
 
 export default function SideBar({
+  setIsOpenFavouriteModal,
   setIsOpenHistoryModal,
   isOpenFilterModal,
   setIsOpenFilterModal,
@@ -30,7 +32,19 @@ export default function SideBar({
     if (authData) {
       setIsOpenHistoryModal(true);
     } else {
-      alert("Please Login first");
+      toast.error("Please Login !", {
+        position: "top-center",
+      });
+    }
+  }
+
+  function handelFavouriteModal() {
+    if (authData) {
+      setIsOpenFavouriteModal(true);
+    } else {
+      toast.error("Please Login !", {
+        position: "top-center",
+      });
     }
   }
 
@@ -42,7 +56,9 @@ export default function SideBar({
           <div>Saved</div>
         </div>
 
-        <div className="text-center my-3 cursor-pointer hover:text-pink-500">
+        <div className="text-center my-3 cursor-pointer hover:text-pink-500"
+        onClick={handelFavouriteModal}
+        >
           <HeartIcon className="w-6 h-6 mx-8" />
           <div>Favourite</div>
         </div>
