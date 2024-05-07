@@ -13,6 +13,7 @@ import Sort from "./sort";
 import Tags from "./tags";
 
 export default function SideBar({
+  setIsOpenSavedModal,
   setIsOpenFavouriteModal,
   setIsOpenHistoryModal,
   isOpenFilterModal,
@@ -48,10 +49,22 @@ export default function SideBar({
     }
   }
 
+  function handelSavedModal(){
+    if (authData) {
+      setIsOpenSavedModal(true);
+    } else {
+      toast.error("Please Login !", {
+        position: "top-center",
+      });
+    }
+  }
+
   return (
     <>
       <div className="flex flex-col text-white text-xs">
-        <div className="text-center my-3 cursor-pointer hover:text-pink-500">
+        <div className="text-center my-3 cursor-pointer hover:text-pink-500"
+        onClick={handelSavedModal}
+        >
           <BookmarkIcon className="w-6 h-6 mx-8" />
           <div>Saved</div>
         </div>

@@ -7,11 +7,14 @@ import { useContext, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context";
 import setHistory from "../../utils/searchHistory";
+import Favourite from "../favourite/favourite";
 import History from "../history/history";
 import Search from "../search/search";
-import Favourite from "../favourite/favourite";
+import Saved from "../saved/saved";
 
 export default function Navbar({
+  isOpenSavedModal,
+  setIsOpenSavedModal,
   isOpenFavouriteModal,
   setIsOpenFavouriteModal,
   isOpenSearchModal,
@@ -138,11 +141,13 @@ export default function Navbar({
         />
       )}
 
-      {
-        isOpenFavouriteModal &&
-        <Favourite 
-          setIsOpenFavouriteModal={setIsOpenFavouriteModal}/>
-      }
+      {isOpenSavedModal && (
+        <Saved setIsOpenSavedModal={setIsOpenSavedModal} />
+      )}
+
+      {isOpenFavouriteModal && (
+        <Favourite setIsOpenFavouriteModal={setIsOpenFavouriteModal} />
+      )}
 
       {isOpenHistoryModal && (
         <History
@@ -152,8 +157,6 @@ export default function Navbar({
           setHistoryData={setHistoryData}
         />
       )}
-
-
     </>
   );
 }

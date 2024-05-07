@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import {
+  BookmarkSlashIcon,
   ClockIcon,
   EllipsisVerticalIcon,
   EyeIcon,
@@ -13,17 +14,25 @@ import { AuthContext } from "../../context";
 
 function Video({ data, isOpenFilterModal }) {
   const [isFavourite, setIsFavourite] = useState(false);
+  const [isOpenSaveButton, setIsOpenSaveButton] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [favouriteCount, setFavouriteCount] = useState(0);
+
   const { authData } = useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
     setFavouriteCount(data.favouriteUser.length);
     if (authData) {
-      const result = data?.favouriteUser?.find((item) => item === authData?.id);
-      result ? setIsFavourite(true) : setIsFavourite(false);
+      const existFavourite = data?.favouriteUser?.find(
+        (item) => item === authData?.id
+      );
+      existFavourite ? setIsFavourite(true) : setIsFavourite(false);
+
+      const existSaved = data?.savedUser?.find((item) => item === authData?.id);
+      existSaved ? setIsSaved(true) : setIsSaved(false);
     }
-  }, [authData, data?.favouriteUser]);
+  }, [authData, data.favouriteUser, data?.savedUser]);
 
   function handelNavigate() {
     if (isOpenFilterModal.sort === true || isOpenFilterModal.tags === true)
@@ -63,6 +72,34 @@ function Video({ data, isOpenFilterModal }) {
               ? setFavouriteCount((prev) => prev - 1)
               : setFavouriteCount((prev) => prev + 1);
             setIsFavourite(!isFavourite);
+          }
+        });
+    }
+  }
+
+  function handelSave() {
+    if (!authData) {
+      //alert for login
+      toast.error("Please Login !", {
+        position: "top-center",
+      });
+    } else {
+      fetch("http://localhost:3500/saved", {
+        method: "PATCH",
+        body: JSON.stringify({
+          isSaved: isSaved ? true : false,
+          userId: authData.id,
+          videoId: data.id,
+        }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      })
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.acknowledged) {
+            setIsSaved(!isSaved);
+            setIsOpenSaveButton(false);
           }
         });
     }
@@ -122,7 +159,24 @@ function Video({ data, isOpenFilterModal }) {
           <span className="ml-1">{getPublishedTime(data.publishedAt)}</span>
         </div>
         <div className="flex">
-          <EllipsisVerticalIcon className="h-6 w-6" />
+          {isOpenSaveButton && (
+            <div className="relative text-black bg-slate-300 rounded p-1 cursor-pointer">
+              {" "}
+              {isSaved ? (
+                <div className="flex" onClick={handelSave}>
+                  <BookmarkSlashIcon className="w-5 h-5" />
+                  Unsave
+                </div>
+              ) : (
+                <div onClick={handelSave}>Save to Watch later</div>
+              )}
+            </div>
+          )}
+
+          <EllipsisVerticalIcon
+            className="h-6 w-6 cursor-pointer"
+            onClick={() => setIsOpenSaveButton(!isOpenSaveButton)}
+          />
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import {
+  BookmarkSlashIcon,
   ClockIcon,
   EllipsisVerticalIcon,
   EyeIcon,
@@ -113,6 +114,8 @@ export default function Player() {
   const [videos, setVideos] = useState(null);
   const [isFavourite, setIsFavourite] = useState(false);
   const [favouriteCount, setFavouriteCount] = useState(0);
+  const [isOpenSaveButton, setIsOpenSaveButton] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [inputComment, setInputComment] = useState("");
   const { authData } = useContext(AuthContext);
   const { id } = useParams();
@@ -142,8 +145,41 @@ export default function Player() {
         (item) => item === authData?.id
       );
       result ? setIsFavourite(true) : setIsFavourite(false);
+
+      const existSaved = video?.savedUser?.find(
+        (item) => item === authData?.id
+      );
+      existSaved ? setIsSaved(true) : setIsSaved(false);
     }
-  }, [authData, video?.favouriteUser]);
+  }, [authData, video?.favouriteUser, video?.savedUser]);
+
+  function handelSave() {
+    if (!authData) {
+      //alert for login
+      toast.error("Please Login !", {
+        position: "top-center",
+      });
+    } else {
+      fetch("http://localhost:3500/saved", {
+        method: "PATCH",
+        body: JSON.stringify({
+          isSaved: isSaved ? true : false,
+          userId: authData.id,
+          videoId: video.id,
+        }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      })
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.acknowledged) {
+            setIsSaved(!isSaved);
+            setIsOpenSaveButton(false);
+          }
+        });
+    }
+  }
 
   function handelFavourite() {
     if (!authData) {
@@ -226,7 +262,7 @@ export default function Player() {
             src={video?.videoLink}
           />
 
-          <div className="flex justify-around mt-4 font-light">
+          <div className="flex justify-around  mt-4 font-light">
             <div className="">
               <div className="flex">
                 <img
@@ -277,8 +313,29 @@ export default function Player() {
               </div>
             </div>
 
-            <div className="flex">
-              <EllipsisVerticalIcon className="h-7 w-7" />
+
+            <div className="">
+            {isOpenSaveButton && (
+                <div className="text-black absolute m-6 mt-0 bg-slate-300 rounded p-1 cursor-pointer">
+                  {" "}
+                  {isSaved ? (
+                    <div className="flex" onClick={handelSave}>
+                      <BookmarkSlashIcon className="w-5 h-5" />
+                      Unsave
+                    </div>
+                  ) : (
+                    <div onClick={handelSave}>Save to Watch later</div>
+                  )}
+                </div>
+              )}
+
+            
+              <EllipsisVerticalIcon
+                className="h-6 w-6 cursor-pointer"
+                onClick={() => setIsOpenSaveButton(!isOpenSaveButton)}
+              />
+
+              
             </div>
           </div>
 
