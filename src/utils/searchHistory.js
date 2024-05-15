@@ -21,11 +21,11 @@ function getHistory() {
   return JSON.parse(localStorage.getItem("history"));
 }
 
-function deleteHistoryById(id){
+function deleteHistoryById(id) {
   const history = getHistory();
-    const afterDelete = history.filter((item) => item.id !== id);
-    localStorage.setItem("history", JSON.stringify(afterDelete));
-    return afterDelete
+  const afterDelete = history.filter((item) => item.id !== id);
+  localStorage.setItem("history", JSON.stringify(afterDelete));
+  return afterDelete;
 }
 
-export { getHistory, deleteHistoryById };
+export { deleteHistoryById, getHistory };

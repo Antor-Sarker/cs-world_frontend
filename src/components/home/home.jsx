@@ -3,80 +3,46 @@ import Navbar from "../navbar/navbar";
 import SideBar from "../sidebar/sideBar";
 import Videos from "../videos/videos";
 
-export default function Home(){
-  const [isOpenSavedModal, setIsOpenSavedModal]=useState(false)
-  const [isOpenSearchModal, setIsOpenSearchModal] = useState(false);
-  const [isOpenHistoryModal, setIsOpenHistoryModal] = useState(false);
-  const [isOpenFavouriteModal, setIsOpenFavouriteModal] = useState(false);
-  const [isOpenFilterModal, setIsOpenFilterModal] = useState({
-    sort: false,
-    tags: false,
-  });
+export default function Home() {
+  const [isOpenModal, setIsOpenModal] = useState("");
+  const [isOpenFilter, setIsOpenFilter] = useState("");
   const [videosData, setVideosData] = useState(null);
+  const [isRefresh, setIsRefresh] = useState(false);
+
   useEffect(() => {
     fetch("http://localhost:3500/videos")
       .then((res) => res.json())
       .then((data) => setVideosData(data));
-  }, [isOpenFavouriteModal]);
-
-  function handelTagsFilter(name) {
-    fetch(`http://localhost:3500/tag?name=${name}`)
-      .then((res) => res.json())
-      .then((data) => setVideosData(data));
-    setIsOpenFilterModal({ sort: false, tags: false });
-  }
-
-  function handelSortFilter(name) {
-    fetch(`http://localhost:3500/sort?by=${name}`)
-      .then((res) => res.json())
-      .then((data) => setVideosData(data));
-    setIsOpenFilterModal({ sort: false, tags: false });
-  }
+  }, [isOpenModal, isRefresh]);
 
   return (
-    <div className="">
+    <div>
       <Navbar
-        isOpenSavedModal={isOpenSavedModal}
-        setIsOpenSavedModal={setIsOpenSavedModal}
-        isOpenFavouriteModal={isOpenFavouriteModal}
-        setIsOpenFavouriteModal={setIsOpenFavouriteModal}
-        isOpenSearchModal={isOpenSearchModal}
-        setIsOpenSearchModal={setIsOpenSearchModal}
-        
-        isOpenHistoryModal={isOpenHistoryModal}
-        setIsOpenHistoryModal={setIsOpenHistoryModal}
+        isOpenModal={isOpenModal}
+        setIsOpenModal={setIsOpenModal}
+        setIsRefresh={setIsRefresh}
       />
-      <div
-        className={`${
-          isOpenSearchModal && "blur"} ${isOpenHistoryModal && "blur"
-        } ${isOpenFavouriteModal && "blur"
-      } ${isOpenSavedModal && "blur"
-    } grid grid-cols-12 absolute top-20 text-white bg-black`}
-      >
+      <div className={`grid grid-cols-12 absolute top-20 text-white bg-black`}>
         <div className="pt-1 col-start-1 col-span-2 sm:col-span-2 md:col-span-1 lg:col-span-1 xl:col-span-1 2xl:col-span-1 fixed z-10">
           <SideBar
-            setIsOpenSavedModal={setIsOpenSavedModal}
-            setIsOpenFavouriteModal={setIsOpenFavouriteModal}
-            isOpenHistoryModal={isOpenHistoryModal}
-            setIsOpenHistoryModal={setIsOpenHistoryModal}
-            isOpenFilterModal={isOpenFilterModal}
-            setIsOpenFilterModal={setIsOpenFilterModal}
-            handelTagsFilter={handelTagsFilter}
-            handelSortFilter={handelSortFilter}
+            setIsOpenModal={setIsOpenModal}
+            isOpenFilter={isOpenFilter}
+            setIsOpenFilter={setIsOpenFilter}
+            setVideosData={setVideosData}
           />
         </div>
 
         <div
           className={`${
-            (isOpenFilterModal.tags || isOpenFilterModal.sort) && "blur-sm"
-          } pt-1 col-start-3 sm:col-start-3 col-span-10 sm:col-span-10 md:col-start-2 md:col-span-11 lg:col-start-2 lg:col-span-11 xl:col-start-2 xl:col-span-11 2xl:col-start-2 2xl:col-span-11 relative ${
+            (isOpenModal || isOpenFilter) && "blur"
+          }  pt-1 col-start-3 sm:col-start-3 col-span-10 sm:col-span-10 md:col-start-2 md:col-span-11 lg:col-start-2 lg:col-span-11 xl:col-start-2 xl:col-span-11 2xl:col-start-2 2xl:col-span-11 relative ${
             videosData?.length < 4 && "h-screen"
           }`}
         >
           <Videos
-             
             videosData={videosData}
-            isOpenFilterModal={isOpenFilterModal}
+            isOpenModal={isOpenModal}
+            isOpenFilter={isOpenFilter}
           />
         </div>
       </div>

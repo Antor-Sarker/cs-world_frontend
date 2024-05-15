@@ -3,30 +3,17 @@ import {
   MagnifyingGlassIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
-import { useContext, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../../context";
+import getAuthData, { setAuthData } from "../../utils/auth";
 import setHistory from "../../utils/searchHistory";
-import Favourite from "../favourite/favourite";
-import History from "../history/history";
+import Modal from "../modal/modal";
 import Search from "../search/search";
-import Saved from "../saved/saved";
 
-export default function Navbar({
-  isOpenSavedModal,
-  setIsOpenSavedModal,
-  isOpenFavouriteModal,
-  setIsOpenFavouriteModal,
-  isOpenSearchModal,
-  setIsOpenSearchModal,
-  isOpenHistoryModal,
-  setIsOpenHistoryModal,
-}) {
+export default function Navbar({ isOpenModal, setIsOpenModal, setIsRefresh }) {
   const [searchResult, setSearchResult] = useState(null);
   const [isOpenLogOutModal, setIsOpenLogOutModal] = useState(false);
-
-  const [historyData, setHistoryData] = useState([]);
-  const { authData, setAuthData } = useContext(AuthContext);
+  const authData = getAuthData();
 
   const inputRef = useRef(null);
   const navigate = useNavigate();
@@ -44,7 +31,7 @@ export default function Navbar({
   function handelOpenSearchModal(searchInput) {
     setHistory(searchInput.value);
     searchInput.value = "";
-    setIsOpenSearchModal((prev) => !prev);
+    setIsOpenModal((prev) => (prev === "search" ? "" : "search"));
     setSearchResult(null);
   }
 
@@ -53,29 +40,15 @@ export default function Navbar({
     setIsOpenLogOutModal(false);
   }
 
-  function handelDeleteHistory(id) {
-    fetch("http://localhost:3500/history", {
-      method: "DELETE",
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-      },
-      body: JSON.stringify({ userId: authData.id, videoId: id }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.acknowledged) {
-          const afterDelete = historyData?.filter((item) => item.id !== id);
-          setHistoryData(afterDelete);
-        }
-      });
-  }
-
   return (
     <>
       <nav className="fixed w-full h-20 z-10 py-5 bg-[#091524]">
         <ul className="flex justify-between mx-5">
           <li className="flex text-white h-10 pt-2">
-            <div className="font-medium text-base sm:text-base md:text-2xl lg:text-2xl xl:text-2xl 2xl:text-2xl">
+            <div
+              className="cursor-pointer font-medium text-base sm:text-base md:text-2xl lg:text-2xl xl:text-2xl 2xl:text-2xl"
+              onClick={() => setIsRefresh((prev) => !prev)}
+            >
               CS-World
             </div>
             <div className="rounded-md flex bg-[#243e5e] mx-5">
@@ -87,7 +60,7 @@ export default function Navbar({
                 id="search"
                 placeholder="Search..."
                 onChange={(event) => handelSearch(event.target.value)}
-                onFocus={() => setIsOpenSearchModal(true)}
+                onFocus={() => setIsOpenModal("search")}
                 ref={inputRef}
               />
             </div>
@@ -101,13 +74,13 @@ export default function Navbar({
             ) : (
               <div className="flex">
                 <div
-                  className=" border border-slate-600 pt-1 mx-3 px-2 rounded hover:bg-green-500 cursor-pointer hidden sm:hidden md:block lg:block xl:block 2xl:block"
+                  className="border border-slate-600 pt-1 mx-3 px-2 rounded hover:bg-green-500 transition delay-100 cursor-pointer hidden sm:hidden md:block lg:block xl:block 2xl:block"
                   onClick={() => navigate("/register")}
                 >
                   Sign up
                 </div>
                 <div
-                  className="border border-slate-600 pt-1 px-2 rounded bg-blue-500 hover:bg-[#091524] cursor-pointer"
+                  className="border border-slate-600 pt-1 px-2 rounded bg-blue-500 hover:bg-[#091524] transition delay-1000 cursor-pointer"
                   onClick={() => navigate("/login")}
                 >
                   Log in
@@ -132,7 +105,7 @@ export default function Navbar({
         </div>
       </div>
       {/* when focus on search input*/}
-      {isOpenSearchModal && (
+      {isOpenModal === "search" && (
         <Search
           searchInput={inputRef.current}
           handelSearch={handelSearch}
@@ -141,20 +114,27 @@ export default function Navbar({
         />
       )}
 
-      {isOpenSavedModal && (
-        <Saved setIsOpenSavedModal={setIsOpenSavedModal} />
+      {isOpenModal === "saved" && (
+        <Modal
+          type="saved"
+          title="Saved Videos"
+          setIsOpenModal={setIsOpenModal}
+        />
       )}
 
-      {isOpenFavouriteModal && (
-        <Favourite setIsOpenFavouriteModal={setIsOpenFavouriteModal} />
+      {isOpenModal === "favourite" && (
+        <Modal
+          type="favourite"
+          title="Your Favourite Videos"
+          setIsOpenModal={setIsOpenModal}
+        />
       )}
 
-      {isOpenHistoryModal && (
-        <History
-          setIsOpenHistoryModal={setIsOpenHistoryModal}
-          handelDeleteHistory={handelDeleteHistory}
-          historyData={historyData}
-          setHistoryData={setHistoryData}
+      {isOpenModal === "history" && (
+        <Modal
+          type="history"
+          title="Videos you've watched"
+          setIsOpenModal={setIsOpenModal}
         />
       )}
     </>

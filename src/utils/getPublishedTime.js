@@ -13,9 +13,8 @@ export default function modifyPublishedTime(publishedAt) {
     "Nov",
     "Dec",
   ];
-  
-  const now = new Date();
 
+  const now = new Date();
   const date = new Date(publishedAt).getDate();
   const month = new Date(publishedAt).getMonth();
   const year = new Date(publishedAt).getFullYear();

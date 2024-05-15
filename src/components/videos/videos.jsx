@@ -9,21 +9,22 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import getPublishedTime from "../../utils/getPublishedTime";
 
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../context";
+import { useEffect, useState } from "react";
+import getAuthData from "../../utils/auth";
 
-function Video({ data, isOpenFilterModal }) {
+function Video({ data, isOpenModal, isOpenFilter }) {
   const [isFavourite, setIsFavourite] = useState(false);
   const [isOpenSaveButton, setIsOpenSaveButton] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [favouriteCount, setFavouriteCount] = useState(0);
 
-  const { authData } = useContext(AuthContext);
   const navigate = useNavigate();
+  const authData = getAuthData();
 
+  //for update favourite and saved button when rerender
   useEffect(() => {
     setFavouriteCount(data.favouriteUser.length);
-    if (authData) {
+    if (getAuthData()) {
       const existFavourite = data?.favouriteUser?.find(
         (item) => item === authData?.id
       );
@@ -32,11 +33,10 @@ function Video({ data, isOpenFilterModal }) {
       const existSaved = data?.savedUser?.find((item) => item === authData?.id);
       existSaved ? setIsSaved(true) : setIsSaved(false);
     }
-  }, [authData, data.favouriteUser, data?.savedUser]);
+  }, [authData?.id, data.favouriteUser, data?.savedUser]);
 
   function handelNavigate() {
-    if (isOpenFilterModal.sort === true || isOpenFilterModal.tags === true)
-      return;
+    if (isOpenModal || isOpenFilter) return;
     fetch("http://localhost:3500/viewCount", {
       method: "POST",
       body: JSON.stringify({ videoId: data.id, logedInUser: authData }),
@@ -57,7 +57,7 @@ function Video({ data, isOpenFilterModal }) {
       fetch("http://localhost:3500/favourite", {
         method: "PATCH",
         body: JSON.stringify({
-          isFavourite: isFavourite ? true : false,
+          favourite: isFavourite ? true : false,
           userId: authData.id,
           videoId: data.id,
         }),
@@ -83,11 +83,12 @@ function Video({ data, isOpenFilterModal }) {
       toast.error("Please Login !", {
         position: "top-center",
       });
+      setIsOpenSaveButton(false);
     } else {
       fetch("http://localhost:3500/saved", {
         method: "PATCH",
         body: JSON.stringify({
-          isSaved: isSaved ? true : false,
+          saved: isSaved ? true : false,
           userId: authData.id,
           videoId: data.id,
         }),
@@ -98,7 +99,13 @@ function Video({ data, isOpenFilterModal }) {
         .then((res) => res.json())
         .then((result) => {
           if (result.acknowledged) {
+            !isSaved &&
+              toast.success("Saved to Watch later", {
+                theme: "colored",
+                position: "top-center",
+              });
             setIsSaved(!isSaved);
+
             setIsOpenSaveButton(false);
           }
         });
@@ -106,7 +113,7 @@ function Video({ data, isOpenFilterModal }) {
   }
 
   return (
-    <div className="text-sm text-[#b9d0ec] transition delay-300 hover:scale-105 p-4 hover:rounded-lg">
+    <div className="text-sm text-[#b9d0ec] transition delay-1000 hover:scale-105 p-4 hover:rounded-lg">
       <div>
         <img
           className="max-w-full rounded-lg cursor-pointer"
@@ -160,15 +167,17 @@ function Video({ data, isOpenFilterModal }) {
         </div>
         <div className="flex">
           {isOpenSaveButton && (
-            <div className="relative text-black bg-slate-300 rounded p-1 cursor-pointer">
+            <div className="relative text-black font-semibold bg-slate-300 rounded cursor-pointer">
               {" "}
               {isSaved ? (
-                <div className="flex" onClick={handelSave}>
+                <div className="flex px-1" onClick={handelSave}>
                   <BookmarkSlashIcon className="w-5 h-5" />
                   Unsave
                 </div>
               ) : (
-                <div onClick={handelSave}>Save to Watch later</div>
+                <div className="px-1" onClick={handelSave}>
+                  Save to Watch later
+                </div>
               )}
             </div>
           )}
@@ -183,14 +192,15 @@ function Video({ data, isOpenFilterModal }) {
   );
 }
 
-export default function Videos({ videosData, isOpenFilterModal }) {
+export default function Videos({ videosData, isOpenModal, isOpenFilter }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
       {videosData?.map((data) => (
         <Video
           key={data.id}
           data={data}
-          isOpenFilterModal={isOpenFilterModal}
+          isOpenModal={isOpenModal}
+          isOpenFilter={isOpenFilter}
         />
       ))}
     </div>

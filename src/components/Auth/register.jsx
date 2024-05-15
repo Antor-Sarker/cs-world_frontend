@@ -1,32 +1,34 @@
-import { Link } from "react-router-dom";
-import {useState} from "react"
-import { useNavigate } from "react-router-dom";
-export default function Register() {
-  const [formData,setFormData]=useState({firstName:'', lastName:'', email:'', password:''})
-  const navigate = useNavigate()
-  function handelSubmit(event){
-    event.preventDefault()
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-    fetch('http://localhost:3500/register',{
+export default function Register() {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+  });
+  const navigate = useNavigate();
+  function handelSubmit(event) {
+    event.preventDefault();
+
+    fetch("http://localhost:3500/register", {
       method: "POST",
       body: JSON.stringify(formData),
       headers: {
-        'Content-type': 'application/json; charset=UTF-8',
-      }
+        "Content-type": "application/json; charset=UTF-8",
+      },
     })
-    .then(res=>res.json())
-    .then(info=>{
-      console.log(info)
-      if(info.acknowledged===true){
-
-        setFormData({firstName:'', lastName:'', email:'', password:''})
-        navigate('/login')
-      }
-    })
-
+      .then((res) => res.json())
+      .then((info) => {
+        if (info.acknowledged === true) {
+          setFormData({ firstName: "", lastName: "", email: "", password: "" });
+          navigate("/login");
+        } else alert("registration failed! please try again");
+      });
   }
-  function handelOnChangeInput(event){
-    setFormData({...formData, [event.target.name]: event.target.value})
+  function handelOnChangeInput(event) {
+    setFormData({ ...formData, [event.target.name]: event.target.value });
   }
 
   return (

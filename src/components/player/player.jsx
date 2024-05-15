@@ -5,181 +5,72 @@ import {
   EllipsisVerticalIcon,
   EyeIcon,
 } from "@heroicons/react/24/outline";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { AuthContext } from "../../context";
+import getAuthData from "../../utils/auth";
 import getPublishedTime from "../../utils/getPublishedTime";
-
-function Display({ item }) {
-  return (
-    <>
-      <div className="m-3">
-        <img
-          className="rounded cursor-pointer"
-          src={item.thumbnail}
-          alt="image"
-        />
-      </div>
-    </>
-  );
-}
-
-function CommentList({ comments, setComments, comment, videoId, authId }) {
-  const [isOpenModify, setIsOpenModify] = useState(false);
-  // const [isOpenEdit,setIsOpenEdit]=useState(false)
-  const { commentId, authorId, authorName, content } = comment;
-  function handelDeleteComment() {
-    fetch("http://localhost:3500/comment", {
-      method: "DELETE",
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-      },
-      body: JSON.stringify({ videoId, commentId }),
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        if (result.acknowledged) {
-          const afterDelete = comments.filter(
-            (comment) => comment.commentId !== commentId
-          );
-          setComments(afterDelete);
-
-          toast.success("delete successfully", {
-            theme: "colored",
-            position: "bottom-center",
-          });
-        }
-      });
-  }
-
-  function handelOpenModal(event) {
-    if (event.target.tagName === "svg" || event.target.tagName === "path") {
-      setIsOpenModify(!isOpenModify);
-    } else {
-      setIsOpenModify(false);
-    }
-  }
-
-  return (
-    <>
-      <div
-        className="flex items-start space-x-4 my-8"
-        onClick={handelOpenModal}
-      >
-        <div className="bg-orange-500 text-white w-10 h-10 mt-3 text-center text-2xl rounded-full">
-          <span className="">{authorName[0]}</span>
-        </div>
-
-        <div className="w-full bg-slate-800 m-3 rounded p-3">
-          <div className="flex justify-between">
-            <div>
-              <h4 className="text-slate -500 font-bold">{authorName}</h4>
-            </div>
-            <div>
-              {authId === authorId && (
-                <EllipsisVerticalIcon
-                  className="w-6 h-6"
-                  onClick={handelOpenModal}
-                />
-              )}
-
-              {isOpenModify && (
-                <div className="rounded absolute">
-                  <div className="cursor-pointer bg-indigo-300 hover:bg-indigo-500 p-3">
-                    edit
-                  </div>
-                  <div
-                    className="cursor-pointer p-3 bg-red-300 hover:bg-red-500"
-                    onClick={handelDeleteComment}
-                  >
-                    delete
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <p className="text-slate-300">{content}</p>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
+import CommentList from "./commentList";
+import Similar from "./similar";
 
 export default function Player() {
   const [video, setVideo] = useState(null);
-  const [videos, setVideos] = useState(null);
+  const [similarVideos, setSimilarVideos] = useState([]);
   const [isFavourite, setIsFavourite] = useState(false);
   const [favouriteCount, setFavouriteCount] = useState(0);
   const [isOpenSaveButton, setIsOpenSaveButton] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [inputComment, setInputComment] = useState("");
-  const { authData } = useContext(AuthContext);
   const { id } = useParams();
-  const [comments, setComments] = useState(null);
   const bottomRef = useRef(null);
-  const authId = authData?.id;
+  const inputRef = useRef(null);
+  const authData = getAuthData();
 
   useEffect(() => {
     fetch(`http://localhost:3500/video/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setVideo(data);
-        setComments(video?.comments);
+        // setComments(data?.comments);
       });
-  }, [id, video?.comments]);
+  }, [id]);
 
   useEffect(() => {
     fetch(`http://localhost:3500/videos`)
       .then((res) => res.json())
-      .then((data) => setVideos(data));
-  }, []);
+      .then((data) => {
+        const similarData = data?.filter((videoData) => {
+          const result = videoData?.tags.find((tag) => {
+            const isExist = video?.tags?.find(
+              (item) => item === tag && video.id !== videoData.id
+            );
+
+            if (isExist) return true;
+            else return false;
+          });
+          if (result) return true;
+          else return false;
+        });
+        setSimilarVideos(similarData);
+      });
+  }, [video]);
 
   useEffect(() => {
     setFavouriteCount(video?.favouriteUser?.length);
-    if (authData) {
-      const result = video?.favouriteUser?.find(
+    if (getAuthData()) {
+      const existFavourite = video?.favouriteUser?.find(
         (item) => item === authData?.id
       );
-      result ? setIsFavourite(true) : setIsFavourite(false);
+      existFavourite ? setIsFavourite(true) : setIsFavourite(false);
 
       const existSaved = video?.savedUser?.find(
         (item) => item === authData?.id
       );
       existSaved ? setIsSaved(true) : setIsSaved(false);
     }
-  }, [authData, video?.favouriteUser, video?.savedUser]);
-
-  function handelSave() {
-    if (!authData) {
-      //alert for login
-      toast.error("Please Login !", {
-        position: "top-center",
-      });
-    } else {
-      fetch("http://localhost:3500/saved", {
-        method: "PATCH",
-        body: JSON.stringify({
-          isSaved: isSaved ? true : false,
-          userId: authData.id,
-          videoId: video.id,
-        }),
-        headers: {
-          "Content-type": "application/json; charset=UTF-8",
-        },
-      })
-        .then((res) => res.json())
-        .then((result) => {
-          if (result.acknowledged) {
-            setIsSaved(!isSaved);
-            setIsOpenSaveButton(false);
-          }
-        });
-    }
-  }
+  }, [authData?.id, video?.favouriteUser, video?.savedUser]);
 
   function handelFavourite() {
     if (!authData) {
@@ -191,7 +82,7 @@ export default function Player() {
       fetch("http://localhost:3500/favourite", {
         method: "PATCH",
         body: JSON.stringify({
-          isFavourite: isFavourite ? true : false,
+          favourite: isFavourite ? true : false,
           userId: authData.id,
           videoId: video.id,
         }),
@@ -206,6 +97,41 @@ export default function Player() {
               ? setFavouriteCount((prev) => prev - 1)
               : setFavouriteCount((prev) => prev + 1);
             setIsFavourite(!isFavourite);
+          }
+        });
+    }
+  }
+
+  function handelSave() {
+    if (!authData) {
+      //alert for login
+      toast.error("Please Login !", {
+        position: "top-center",
+      });
+      setIsOpenSaveButton(false);
+    } else {
+      fetch("http://localhost:3500/saved", {
+        method: "PATCH",
+        body: JSON.stringify({
+          saved: isSaved ? true : false,
+          userId: authData.id,
+          videoId: video.id,
+        }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      })
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.acknowledged) {
+            !isSaved &&
+              toast.success("Saved to Watch later", {
+                theme: "colored",
+                position: "top-center",
+              });
+            setIsSaved(!isSaved);
+
+            setIsOpenSaveButton(false);
           }
         });
     }
@@ -246,6 +172,76 @@ export default function Player() {
     }
   }
 
+  function handelEdit(event) {
+    event.preventDefault();
+
+    fetch("http://localhost:3500/comment", {
+      method: "PATCH",
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify({
+        videoId: video?.id,
+        commentId: editId,
+        content: inputComment,
+      }),
+    })
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.acknowledged) {
+          const afterUpdate = video?.comments.map((comment) => {
+            if (comment.commentId === editId) {
+              return { ...comment, content: inputComment };
+            } else return comment;
+          });
+
+          setVideo({ ...video, comments: [...afterUpdate] });
+          setInputComment("");
+          setIsEdit(false);
+
+          toast.success("update successfully", {
+            theme: "colored",
+            position: "bottom-center",
+          });
+        }
+      });
+  }
+
+  function handelDeleteComment(commentId) {
+    fetch("http://localhost:3500/comment", {
+      method: "DELETE",
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify({ videoId: video?.id, commentId }),
+    })
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.acknowledged) {
+          const afterDelete = video?.comments.filter(
+            (comment) => comment.commentId !== commentId
+          );
+
+          setVideo({ ...video, comments: [...afterDelete] });
+
+          toast.success("delete successfully", {
+            theme: "colored",
+            position: "bottom-center",
+          });
+        }
+      });
+  }
+
+  function handelEditInput(commentId) {
+    setIsEdit(true);
+    setEditId(commentId);
+
+    const existedComment = video?.comments?.find(
+      (item) => item.commentId === commentId
+    );
+    setInputComment(existedComment?.content);
+  }
+
   function handelScroll(event) {
     bottomRef.current.scrollIntoView();
     event.target.placeholder = authData
@@ -257,11 +253,11 @@ export default function Player() {
     <>
       <div className="grid grid-cols-6 pt-5 bg-black text-white">
         <div className="p-4 col-start-1 col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-4 xl:col-span-4">
+          {/* play video  */}
           <iframe
             className="w-full h-96 rounded bg-[#0d0d0e] p-2 shadow-md"
             src={video?.videoLink}
           />
-
           <div className="flex justify-around  mt-4 font-light">
             <div className="">
               <div className="flex">
@@ -313,9 +309,8 @@ export default function Player() {
               </div>
             </div>
 
-
             <div className="">
-            {isOpenSaveButton && (
+              {isOpenSaveButton && (
                 <div className="text-black absolute m-6 mt-0 bg-slate-300 rounded p-1 cursor-pointer">
                   {" "}
                   {isSaved ? (
@@ -329,32 +324,31 @@ export default function Player() {
                 </div>
               )}
 
-            
               <EllipsisVerticalIcon
                 className="h-6 w-6 cursor-pointer"
                 onClick={() => setIsOpenSaveButton(!isOpenSaveButton)}
               />
-
-              
             </div>
           </div>
 
+          {/* input comment */}
           <section ref={bottomRef}>
             <div className="mx-auto w-full md:w-10/12 container">
               <h2 className="text-indigo-300 text-xl font-bold my-5">
                 Comments ({video?.comments?.length})
               </h2>
               <div className="flex items center space-x-4">
-                <div className="bg-orange-500 text-white text-2xl h-20 w-20 text-center p-6 rounded-full">
-                  A
+                <div className="bg-red-500 text-white text-2xl h-20 w-20 text-center p-6 rounded-full">
+                  {authData?.firstName[0]}
                 </div>
                 <div className="w-10/12">
-                  <form onSubmit={handelOnSubmitComment}>
+                  <form onSubmit={isEdit ? handelEdit : handelOnSubmitComment}>
                     <textarea
                       className="w-full bg-[#030317] border border-slate-500 text-slate-300 p-4 rounded-md focus:outline-none"
                       placeholder="Write a comment"
                       onChange={(event) => setInputComment(event.target.value)}
                       onFocus={(e) => handelScroll(e)}
+                      ref={inputRef}
                       value={inputComment}
                     ></textarea>
                     <div className="flex justify-end mt-4">
@@ -362,7 +356,7 @@ export default function Player() {
                         disabled={inputComment === "" && true}
                         className="bg-indigo-600 text-white px-6 py-2 md:py-3 rounded-md hover:bg-indigo-700 transition-all duration-200"
                       >
-                        Comment
+                        {isEdit ? "update" : "Comment"}
                       </button>
                     </div>
                   </form>
@@ -371,23 +365,24 @@ export default function Player() {
             </div>
 
             {/* display comments */}
-            {comments?.map((comment) => (
+            {video?.comments?.map((comment) => (
               <CommentList
                 key={comment.commentId}
-                comments={comments}
-                setComments={setComments}
+                authId={authData?.id}
                 comment={comment}
-                videoId={video.id}
-                authId={authId}
+                handelDeleteComment={handelDeleteComment}
+                handelEditInput={handelEditInput}
+                setIsEdit={setIsEdit}
+                bottomRef={bottomRef}
+                inputRef={inputRef}
               />
             ))}
           </section>
         </div>
 
+        {/* display similar videos */}
         <div className="col-span-2 px-10 hidden sm:hidden md:hidden lg:block xl:block 2xl:block h-screen overflow-y-scroll">
-          {videos?.map((item) => (
-            <Display key={item.id} item={item} />
-          ))}
+          <Similar similarVideos={similarVideos} />
         </div>
       </div>
     </>

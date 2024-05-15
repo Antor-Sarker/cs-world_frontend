@@ -7,6 +7,7 @@ import setHistory, {
   getHistory,
 } from "../../utils/searchHistory";
 
+//search history
 function History({ handelSearch, searchInput }) {
   const [searchHistory, setSearchHistory] = useState([]);
   useEffect(() => {
@@ -54,6 +55,7 @@ function History({ handelSearch, searchInput }) {
   );
 }
 
+// search result
 function Result({ item, searchInput }) {
   const navigate = useNavigate();
 

@@ -7,51 +7,21 @@ import {
   TagIcon,
 } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
-import { useContext } from "react";
-import { AuthContext } from "../../context";
+import getAuthData from "../../utils/auth";
 import Sort from "./sort";
 import Tags from "./tags";
 
 export default function SideBar({
-  setIsOpenSavedModal,
-  setIsOpenFavouriteModal,
-  setIsOpenHistoryModal,
-  isOpenFilterModal,
-  setIsOpenFilterModal,
-  handelTagsFilter,
-  handelSortFilter,
+  setIsOpenModal,
+  isOpenFilter,
+  setIsOpenFilter,
+  setVideosData,
 }) {
-  const { authData } = useContext(AuthContext);
-  function handelOpenFilterModal(name, type) {
-    type === "open" &&
-      setIsOpenFilterModal({ ...isOpenFilterModal, [name]: true });
-    type === "close" &&
-      setIsOpenFilterModal({ ...isOpenFilterModal, [name]: false });
-  }
+  const authData = getAuthData();
 
-  function handelHistoryModal() {
+  function handelOpenModal(type) {
     if (authData) {
-      setIsOpenHistoryModal(true);
-    } else {
-      toast.error("Please Login !", {
-        position: "top-center",
-      });
-    }
-  }
-
-  function handelFavouriteModal() {
-    if (authData) {
-      setIsOpenFavouriteModal(true);
-    } else {
-      toast.error("Please Login !", {
-        position: "top-center",
-      });
-    }
-  }
-
-  function handelSavedModal(){
-    if (authData) {
-      setIsOpenSavedModal(true);
+      setIsOpenModal(type);
     } else {
       toast.error("Please Login !", {
         position: "top-center",
@@ -62,15 +32,17 @@ export default function SideBar({
   return (
     <>
       <div className="flex flex-col text-white text-xs">
-        <div className="text-center my-3 cursor-pointer hover:text-pink-500"
-        onClick={handelSavedModal}
+        <div
+          className="text-center my-3 cursor-pointer hover:text-pink-500"
+          onClick={() => handelOpenModal("saved")}
         >
           <BookmarkIcon className="w-6 h-6 mx-8" />
           <div>Saved</div>
         </div>
 
-        <div className="text-center my-3 cursor-pointer hover:text-pink-500"
-        onClick={handelFavouriteModal}
+        <div
+          className="text-center my-3 cursor-pointer hover:text-pink-500"
+          onClick={() => handelOpenModal("favourite")}
         >
           <HeartIcon className="w-6 h-6 mx-8" />
           <div>Favourite</div>
@@ -78,7 +50,7 @@ export default function SideBar({
 
         <div
           className="text-center my-3 cursor-pointer hover:text-pink-500"
-          onClick={handelHistoryModal}
+          onClick={() => handelOpenModal("history")}
         >
           <EyeIcon className="w-6 h-6 mx-8" />
           <div>History</div>
@@ -86,7 +58,7 @@ export default function SideBar({
 
         <div
           className="text-center my-3 cursor-pointer hover:text-pink-500"
-          onClick={() => handelOpenFilterModal("sort", "open")}
+          onClick={() => setIsOpenFilter("sort")}
         >
           <AdjustmentsVerticalIcon className="w-6 h-6 mx-8" />
           <div>Sort</div>
@@ -94,24 +66,19 @@ export default function SideBar({
 
         <div
           className="text-center my-3 cursor-pointer hover:text-pink-500"
-          onClick={() => handelOpenFilterModal("tags", "open")}
+          onClick={() => setIsOpenFilter("tags")}
         >
           <TagIcon className="w-6 h-6 mx-8" />
           <div>Tags</div>
         </div>
       </div>
 
-      {isOpenFilterModal.sort && (
-        <Sort
-          handelOpenFilterModal={handelOpenFilterModal}
-          handelSortFilter={handelSortFilter}
-        />
+      {isOpenFilter === "sort" && (
+        <Sort setIsOpenFilter={setIsOpenFilter} setVideosData={setVideosData} />
       )}
-      {isOpenFilterModal.tags && (
-        <Tags
-          handelOpenFilterModal={handelOpenFilterModal}
-          handelTagsFilter={handelTagsFilter}
-        />
+
+      {isOpenFilter === "tags" && (
+        <Tags setIsOpenFilter={setIsOpenFilter} setVideosData={setVideosData} />
       )}
     </>
   );

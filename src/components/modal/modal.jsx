@@ -1,22 +1,26 @@
 /* eslint-disable react/prop-types */
-import { TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useContext, useEffect, useState } from "react";
+import {
+  ExclamationCircleIcon,
+  TrashIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../../context";
+import getAuthData from "../../utils/auth";
 
-function List({ item, savedData, setSavedData }) {
+function List({ type, item, data, setData }) {
   const navigate = useNavigate();
-  const { authData } = useContext(AuthContext);
+  const authData = getAuthData();
 
   function handelNavigate(url) {
     navigate(url);
   }
 
-  function handelRemoveSaved(videoId) {
-    fetch("http://localhost:3500/saved", {
-      method: "PATCH",
+  function handelRemove(videoId) {
+    fetch(`http://localhost:3500/${type}`, {
+      method: type === "history" ? "DELETE" : "PATCH",
       body: JSON.stringify({
-        isSaved: true,
+        [type]: true,
         userId: authData.id,
         videoId,
       }),
@@ -27,8 +31,8 @@ function List({ item, savedData, setSavedData }) {
       .then((res) => res.json())
       .then((result) => {
         if (result.acknowledged) {
-          const afterRemove = savedData.filter((video) => video.id !== item.id);
-          setSavedData(afterRemove);
+          const afterRemove = data.filter((video) => video.id !== item.id);
+          setData(afterRemove);
         }
       });
   }
@@ -42,7 +46,7 @@ function List({ item, savedData, setSavedData }) {
       />
       <div
         className="pt-12 cursor-pointer"
-        onClick={() => handelRemoveSaved(item.id)}
+        onClick={() => handelRemove(item.id)}
       >
         <TrashIcon className="w-8 h-8 hover:text-red-500" />
       </div>
@@ -50,44 +54,52 @@ function List({ item, savedData, setSavedData }) {
   );
 }
 
-export default function Saved({ setIsOpenSavedModal }) {
-  const [savedData, setSavedData] = useState(null);
-  const { authData } = useContext(AuthContext);
+// reusable component for saved, favourite, history modal
+export default function Modal({ type, title, setIsOpenModal }) {
+  const [data, setData] = useState(null);
+  const authData = getAuthData();
 
   useEffect(() => {
-    fetch(`http://localhost:3500/saved/${authData.id}`)
+    fetch(`http://localhost:3500/${type}/${authData.id}`)
       .then((res) => res.json())
-      .then((data) => setSavedData(data));
-  }, [authData.id]);
+      .then((data) => setData(data));
+  }, [authData.id, type]);
 
   return (
     <div
-      className="bg-blue-950 w-full sm:w-full md:w-6/12 lg:w-4/12 xl:w-4/12 2xl:w-4/12 h-screen fixed top-20 z-20 overflow-y-scroll"
+      className="bg-blue-950 w-full sm:w-full md:w-6/12 lg:w-4/12 xl:w-4/12 2xl:w-4/12 h-5/6 fixed top-20 z-20 overflow-y-scroll"
       style={{ scrollbarWidth: "thin", scrollbarColor: "#81ABBC black" }}
     >
       <div className=" flex justify-between border-b-2 border-slate-700 mb-5">
         <div className="text-indigo-400 text-xl text-center py-5 px-3">
-          Saved Videos
+          {title}
         </div>
 
         <div
           className="text-white justify-end"
-          onClick={() => setIsOpenSavedModal(false)}
+          onClick={() => setIsOpenModal("")}
         >
           <XMarkIcon className="w-9 h-9 cursor-pointer" />
         </div>
       </div>
 
       <div className="">
-        {savedData?.map((item) => (
+        {data?.map((item) => (
           <List
             key={item?.id}
+            type={type}
             item={item}
-            savedData={savedData}
-            setSavedData={setSavedData}
+            data={data}
+            setData={setData}
           />
         ))}
-        {savedData?.length === 0 && <p>empty</p>}
+        {data?.length === 0 && (
+          <div className="flex justify-center text-red-200">
+            {" "}
+            <ExclamationCircleIcon className="w-8 h-8 px-1" />{" "}
+            <p className="text-center font-light text-lg">empty!</p>
+          </div>
+        )}
       </div>
     </div>
   );
