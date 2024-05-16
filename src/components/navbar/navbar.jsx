@@ -23,7 +23,7 @@ export default function Navbar({ isOpenModal, setIsOpenModal, setIsRefresh }) {
       setSearchResult(null);
       return;
     }
-    fetch(`http://localhost:3500/search?q=${query}`)
+    fetch(`https://cs-world-backend.vercel.app/search?q=${query}`)
       .then((res) => res.json())
       .then((data) => setSearchResult(data));
   }

@@ -3,7 +3,7 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
 export default function Sort({ setIsOpenFilter, setVideosData }) {
   function handelSortFilter(name) {
-    fetch(`http://localhost:3500/sort?by=${name}`)
+    fetch(`https://cs-world-backend.vercel.app/sort?by=${name}`)
       .then((res) => res.json())
       .then((data) => setVideosData(data));
     setIsOpenFilter("");

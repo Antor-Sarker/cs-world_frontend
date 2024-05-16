@@ -17,7 +17,7 @@ function List({ type, item, data, setData }) {
   }
 
   function handelRemove(videoId) {
-    fetch(`http://localhost:3500/${type}`, {
+    fetch(`https://cs-world-backend.vercel.app/${type}`, {
       method: type === "history" ? "DELETE" : "PATCH",
       body: JSON.stringify({
         [type]: true,
@@ -60,7 +60,7 @@ export default function Modal({ type, title, setIsOpenModal }) {
   const authData = getAuthData();
 
   useEffect(() => {
-    fetch(`http://localhost:3500/${type}/${authData.id}`)
+    fetch(`https://cs-world-backend.vercel.app/${type}/${authData.id}`)
       .then((res) => res.json())
       .then((data) => setData(data));
   }, [authData.id, type]);

@@ -10,7 +10,7 @@ export default function Home() {
   const [isRefresh, setIsRefresh] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:3500/videos")
+    fetch("https://cs-world-backend.vercel.app/videos")
       .then((res) => res.json())
       .then((data) => setVideosData(data));
   }, [isOpenModal, isRefresh]);

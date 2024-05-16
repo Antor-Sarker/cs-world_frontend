@@ -3,7 +3,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function Tags({ setIsOpenFilter, setVideosData }) {
   function handelTagsFilter(name) {
-    fetch(`http://localhost:3500/tag?name=${name}`)
+    fetch(`https://cs-world-backend.vercel.app/tag?name=${name}`)
       .then((res) => res.json())
       .then((data) => setVideosData(data));
     setIsOpenFilter("");

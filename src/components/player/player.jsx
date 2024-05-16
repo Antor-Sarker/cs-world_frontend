@@ -29,16 +29,15 @@ export default function Player() {
   const authData = getAuthData();
 
   useEffect(() => {
-    fetch(`http://localhost:3500/video/${id}`)
+    fetch(`https://cs-world-backend.vercel.app/video/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setVideo(data);
-        // setComments(data?.comments);
       });
   }, [id]);
 
   useEffect(() => {
-    fetch(`http://localhost:3500/videos`)
+    fetch(`https://cs-world-backend.vercel.app/videos`)
       .then((res) => res.json())
       .then((data) => {
         const similarData = data?.filter((videoData) => {
@@ -79,7 +78,7 @@ export default function Player() {
         position: "top-center",
       });
     } else {
-      fetch("http://localhost:3500/favourite", {
+      fetch("https://cs-world-backend.vercel.app/favourite", {
         method: "PATCH",
         body: JSON.stringify({
           favourite: isFavourite ? true : false,
@@ -110,7 +109,7 @@ export default function Player() {
       });
       setIsOpenSaveButton(false);
     } else {
-      fetch("http://localhost:3500/saved", {
+      fetch("https://cs-world-backend.vercel.app/saved", {
         method: "PATCH",
         body: JSON.stringify({
           saved: isSaved ? true : false,
@@ -149,7 +148,7 @@ export default function Player() {
         time: new Date(),
       };
 
-      fetch(`http://localhost:3500/comment?videoId=${id}`, {
+      fetch(`https://cs-world-backend.vercel.app/comment?videoId=${id}`, {
         method: "POST",
         body: JSON.stringify(commentsData),
         headers: {
@@ -175,7 +174,7 @@ export default function Player() {
   function handelEdit(event) {
     event.preventDefault();
 
-    fetch("http://localhost:3500/comment", {
+    fetch("https://cs-world-backend.vercel.app/comment", {
       method: "PATCH",
       headers: {
         "Content-type": "application/json; charset=UTF-8",
@@ -208,7 +207,7 @@ export default function Player() {
   }
 
   function handelDeleteComment(commentId) {
-    fetch("http://localhost:3500/comment", {
+    fetch("https://cs-world-backend.vercel.app/comment", {
       method: "DELETE",
       headers: {
         "Content-type": "application/json; charset=UTF-8",

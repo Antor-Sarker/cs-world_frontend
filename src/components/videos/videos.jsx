@@ -37,14 +37,16 @@ function Video({ data, isOpenModal, isOpenFilter }) {
 
   function handelNavigate() {
     if (isOpenModal || isOpenFilter) return;
-    fetch("http://localhost:3500/viewCount", {
+    fetch("https://cs-world-backend.vercel.app/viewCount", {
       method: "POST",
       body: JSON.stringify({ videoId: data.id, logedInUser: authData }),
       headers: {
         "Content-type": "application/json; charset=UTF-8",
       },
-    });
-    navigate(`video/${data.id}`);
+    })
+    .then(res=>{
+      res && navigate(`video/${data.id}`);
+    })
   }
 
   function handelFavourite() {
@@ -54,7 +56,7 @@ function Video({ data, isOpenModal, isOpenFilter }) {
         position: "top-center",
       });
     } else {
-      fetch("http://localhost:3500/favourite", {
+      fetch("https://cs-world-backend.vercel.app/favourite", {
         method: "PATCH",
         body: JSON.stringify({
           favourite: isFavourite ? true : false,
@@ -85,7 +87,7 @@ function Video({ data, isOpenModal, isOpenFilter }) {
       });
       setIsOpenSaveButton(false);
     } else {
-      fetch("http://localhost:3500/saved", {
+      fetch("https://cs-world-backend.vercel.app/saved", {
         method: "PATCH",
         body: JSON.stringify({
           saved: isSaved ? true : false,

@@ -12,7 +12,7 @@ export default function Register() {
   function handelSubmit(event) {
     event.preventDefault();
 
-    fetch("http://localhost:3500/register", {
+    fetch("https://cs-world-backend.vercel.app/register", {
       method: "POST",
       body: JSON.stringify(formData),
       headers: {

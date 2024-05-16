@@ -6,7 +6,7 @@ function Video({ id, thumbnail }) {
   const navigate = useNavigate();
 
   function handelNavigate() {
-    fetch("http://localhost:3500/viewCount", {
+    fetch("https://cs-world-backend.vercel.app/viewCount", {
       method: "POST",
       body: JSON.stringify({ videoId: id, logedInUser: authData }),
       headers: {

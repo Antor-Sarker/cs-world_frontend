@@ -10,7 +10,7 @@ export default function Login() {
   function handelSubmit(event) {
     event.preventDefault();
 
-    fetch("http://localhost:3500/login", {
+    fetch("https://cs-world-backend.vercel.app/login", {
       method: "POST",
       body: JSON.stringify(userInfo),
       headers: {
