@@ -46,7 +46,7 @@ function History({ handelSearch, searchInput }) {
           </div>
         );
       })}
-      {searchHistory.length === 0 && (
+      {searchHistory?.length === 0 && (
         <p className="text-slate-400 text-xl text-center pt-20">
           Not Yet Searched !
         </p>
@@ -99,7 +99,7 @@ export default function Search({
         {searchResult === null
           ? "Search History"
           : searchResult?.length
-          ? searchResult.length + " Results Found"
+          ? searchResult?.length + " Results Found"
           : "No Results Found"}
       </div>
 

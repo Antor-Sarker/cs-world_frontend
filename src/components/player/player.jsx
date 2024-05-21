@@ -262,11 +262,11 @@ export default function Player() {
               <div className="flex">
                 <img
                   className=" h-7 w-7 text-center rounded-full"
-                  src={video?.channel.avatar}
+                  src={video?.channel?.avatar}
                   alt="channel"
                 />
                 <span className="mt-1 ml-1 text-indigo-300">
-                  {video?.channel.name}
+                  {video?.channel?.name}
                 </span>
               </div>
 

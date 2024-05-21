@@ -43,10 +43,9 @@ function Video({ data, isOpenModal, isOpenFilter }) {
       headers: {
         "Content-type": "application/json; charset=UTF-8",
       },
-    })
-    .then(res=>{
+    }).then((res) => {
       res && navigate(`video/${data.id}`);
-    })
+    });
   }
 
   function handelFavourite() {
