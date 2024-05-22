@@ -1,8 +1,18 @@
-# React + Vite
+# CS-World (Video Player)
+## Play videos, create playlists, and personalize your viewing.
+### live website: [https://cs-world-app.netlify.app](https://cs-world-app.netlify.app)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Installation:
+```
+npm install
+npm run dev
+```
+## Features:
+-Login & Registration: Create a free account to unlock personalized features.
+-Comment: Discuss videos and connect with other viewers.
+-Favorites List & Watch Later: Organize your video library for easy access.
+-Watching History: Track your watched videos.
+-Search: find specific videos with powerful search tools
+-Sorting & Filtering: Refine your search with sorting by popular, latest, oldest. Discover videos by tags for a tailored experience.
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
